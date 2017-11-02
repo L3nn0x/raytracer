@@ -1,6 +1,6 @@
 use std::ops::{Neg, AddAssign, SubAssign, MulAssign, DivAssign, Add, Sub, Mul, Div};
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Default, PartialEq, Copy, Clone)]
 pub struct Vec3 {
     pub x: f32,
     pub y: f32,
@@ -46,6 +46,17 @@ impl Div for Vec3 {
             x: self.x / rhs.x,
             y: self.y / rhs.y,
             z: self.z / rhs.z,
+        }
+    }
+}
+
+impl Div<f32> for Vec3 {
+    type Output = Vec3;
+    fn div(self, t: f32) -> Vec3 {
+        Vec3{
+            x: self.x / t,
+            y: self.y / t,
+            z: self.z / t,
         }
     }
 }
@@ -227,6 +238,7 @@ fn vec3_mul() {
 fn vec3_div() {
     let a = Vec3{x: 1.0, y: 2.0, z: 3.0};
     assert!(a / a == Vec3{x: 1.0, y: 1.0, z: 1.0});
+    assert!(a / 1.0 == a);
 }
 
 #[test]
