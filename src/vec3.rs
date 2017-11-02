@@ -7,6 +7,20 @@ pub struct Vec3 {
     pub z: f32
 }
 
+impl Vec3 {
+    pub fn length(&self) -> f32 {
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+
+    pub fn squared_length(&self) -> f32 {
+        self.x * self.x + self.y * self.y + self.z * self.z
+    }
+
+    pub fn make_unit(&mut self) {
+        *self /= self.length();
+    }
+}
+
 pub fn cross(v1: &Vec3, v2: &Vec3) -> Vec3 {
     Vec3{
         x: v1.y * v2.z - v1.z * v2.y,
@@ -17,6 +31,12 @@ pub fn cross(v1: &Vec3, v2: &Vec3) -> Vec3 {
 
 pub fn dot(v1: &Vec3, v2: &Vec3) -> f32 {
     v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
+}
+
+pub fn unit_vector(v: &Vec3) -> Vec3 {
+    let mut tmp = v.clone();
+    tmp.make_unit();
+    tmp
 }
 
 impl Div for Vec3 {
@@ -48,6 +68,17 @@ impl Mul for Vec3 {
             x: self.x * rhs.x,
             y: self.y * rhs.y,
             z: self.z * rhs.z,
+        }
+    }
+}
+
+impl Mul<Vec3> for f32 {
+    type Output = Vec3;
+    fn mul(self, rhs: Vec3) -> Vec3 {
+        Vec3{
+            x: rhs.x * self,
+            y: rhs.y * self,
+            z: rhs.z * self,
         }
     }
 }
@@ -210,4 +241,36 @@ fn vec3_cross() {
     let a = Vec3{x: 1.0, y: 2.0, z: 3.0};
     let b = Vec3{x: 2.0, y: 3.0, z: 4.0};
     assert!(cross(&a, &b) == Vec3{x: -1.0, y: 2.0, z: -1.0});
+}
+
+#[test]
+fn vec3_length() {
+    let a = Vec3{x: 1.0, y: 1.0, z: 1.0};
+    assert!(a.length() == (3.0 as f32).sqrt());
+}
+
+#[test]
+fn vec3_squared_length() {
+    let a = Vec3{x: 1.0, y: 1.0, z: 1.0};
+    assert!(a.squared_length() == 3.0);
+}
+
+#[test]
+fn vec3_make_unit() {
+    let mut a = Vec3{x: 1.0, y: 0.0, z: 0.0};
+    a.make_unit();
+    assert!(a.length() == 1.0);
+    let mut a = Vec3{x: 0.0, y: 1.0, z: 0.0};
+    a.make_unit();
+    assert!(a.length() == 1.0);
+    let mut a = Vec3{x: 0.0, y: 0.0, z: 1.0};
+    a.make_unit();
+    assert!(a.length() == 1.0);
+}
+
+#[test]
+fn vec3_unit_vector() {
+    let a = Vec3{x: 1.0, y: 0.0, z: 0.0};
+    let a = unit_vector(&a);
+    assert!(a.length() == 1.0);
 }
