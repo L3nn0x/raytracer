@@ -40,8 +40,8 @@ fn main() {
         for i in 0..nx {
             let mut col: Vec3 = Default::default();
             for _k in 0..ns {
-                let u = rand::random::<f32>() + i as f32 / nx as f32;
-                let v = rand::random::<f32>() + j as f32 / ny as f32;
+                let u = (rand::random::<f32>() + i as f32) / nx as f32;
+                let v = (rand::random::<f32>() + j as f32) / ny as f32;
                 let ray = cam.get_ray(u, v);
                 col += color(ray, &world);
             }
