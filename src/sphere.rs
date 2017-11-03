@@ -7,6 +7,15 @@ pub struct Sphere {
     pub radius: f32
 }
 
+impl Sphere {
+    pub fn new(center: Vec3, radius: f32) -> Sphere {
+        Sphere{
+            center: center,
+            radius: radius
+        }
+    }
+}
+
 impl Hitable for Sphere {
     fn hit(&self, ray: &Ray, tmin: f32, tmax: f32, rec: &mut HitRecord) -> bool {
         let oc = ray.origin - self.center;

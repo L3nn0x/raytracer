@@ -1,9 +1,16 @@
 use hitable::{HitRecord, Hitable};
-use vec3::Vec3;
 use ray::Ray;
 
 pub struct HitableList {
-    pub list: Vec<Box<Hitable>>
+    list: Vec<Box<Hitable>>
+}
+
+impl HitableList {
+    pub fn new(list: Vec<Box<Hitable>>) -> HitableList {
+        HitableList{
+            list: list
+        }
+    }
 }
 
 impl Hitable for HitableList {

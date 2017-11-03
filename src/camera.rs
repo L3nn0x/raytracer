@@ -8,22 +8,20 @@ pub struct Camera {
     vertical: Vec3
 }
 
-impl Default for Camera {
-    fn default() -> Camera {
+impl Camera {
+    pub fn new() -> Camera {
         Camera{
             origin: Default::default(),
-            lower_left_corner: Vec3{x: -2.0, y: -1.0, z: -1.0},
-            horizontal: Vec3{x: 4.0, y: 0.0, z: 0.0},
-            vertical: Vec3{x: 0.0, y: 2.0, z: 0.0},
+            lower_left_corner: Vec3::new(-2.0, -1.0, -1.0),
+            horizontal: Vec3::new(4.0, 0.0, 0.0),
+            vertical: Vec3::new(0.0, 2.0, 0.0),
         }
     }
-}
 
-impl Camera {
     pub fn get_ray(&self, u: f32, v: f32) -> Ray {
-        Ray{
-            origin: self.origin,
-            direction: self.lower_left_corner + u * self.horizontal + v * self.vertical - self.origin
-        }
+        Ray::new(self.origin.clone(),
+                self.lower_left_corner +
+                u * self.horizontal +
+                v * self.vertical - self.origin)
     }
 }
