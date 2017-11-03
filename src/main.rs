@@ -56,6 +56,7 @@ fn main() {
                 col += color(ray, &world);
             }
             col /= ns as f32;
+            let col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());
             let ir = (255.99 * col.x) as i32;
             let ig = (255.99 * col.y) as i32;
             let ib = (255.99 * col.z) as i32;
