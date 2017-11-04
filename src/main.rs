@@ -14,13 +14,14 @@ use hitable_list::HitableList;
 use sphere::Sphere;
 use hitable::{HitRecord, Hitable};
 use camera::Camera;
-use lambertian::random_in_unit_sphere;
+use lambertian::{random_in_unit_sphere, Lambertian};
+
+use std::rc::Rc;
 
 extern crate rand;
 
 fn color(ray: Ray, world: &Hitable) -> Vec3 {
-    let mut rec : HitRecord = Default::default();
-    if world.hit(&ray, 0.0, 10000.0, &mut rec) {
+    if let Some(rec) = world.hit(&ray, 0.0, 10000.0) {
         let target = rec.p + rec.normal + random_in_unit_sphere();
         return 0.5 * color(Ray::new(rec.p, target - rec.p), world);
     }
@@ -36,8 +37,8 @@ fn main() {
     let ns = 100;
     println!("P3\n{} {}\n255", nx, ny);
     let objs: Vec<Box<Hitable>> = vec![
-        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)),
-        Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0))
+        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Rc::new(Lambertian::new(Vec3::new(0.0, 0.0, 0.0))))),
+        Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Rc::new(Lambertian::new(Vec3::new(0.0, 0.0, 0.0)))))
     ];
     let world = HitableList::new(objs);
     let cam = Camera::new();

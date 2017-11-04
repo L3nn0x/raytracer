@@ -3,6 +3,7 @@ use vec3::{Vec3, dot};
 use ray::Ray;
 use hitable::HitRecord;
 
+#[derive(Clone)]
 pub struct Metal {
     albedo: Vec3
 }

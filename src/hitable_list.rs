@@ -14,17 +14,15 @@ impl HitableList {
 }
 
 impl Hitable for HitableList {
-    fn hit(&self, ray: &Ray, tmin: f32, tmax: f32, rec: &mut HitRecord) -> bool {
-        let mut tmp_rec: HitRecord = Default::default();
-        let mut hit_anything = false;
+    fn hit(&self, ray: &Ray, tmin: f32, tmax: f32) -> Option<HitRecord> {
+        let mut rec: Option<HitRecord> = None;
         let mut closest = tmax;
         for elem in self.list.iter() {
-            if elem.hit(&ray, tmin, closest, &mut tmp_rec) {
-                hit_anything = true;
+            if let Some(tmp_rec) = elem.hit(&ray, tmin, closest) {
                 closest = tmp_rec.t;
-                *rec = tmp_rec.clone();
+                rec = Some(tmp_rec);
             }
         }
-        hit_anything
+        rec
     }
 }

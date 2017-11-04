@@ -5,6 +5,7 @@ use hitable::HitRecord;
 
 extern crate rand;
 
+#[derive(Clone)]
 pub struct Lambertian {
     albedo: Vec3
 }
