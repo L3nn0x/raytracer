@@ -1,4 +1,4 @@
-use material::Material;
+use material::{Material, MaterialResult};
 use vec3::{Vec3, dot};
 use ray::Ray;
 use hitable::HitRecord;
@@ -17,11 +17,13 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn scatter(&self, ray_in: &Ray, rec: &HitRecord, attenuation: &mut Vec3, scattered: &mut Ray) -> bool {
+    fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<MaterialResult> {
         let reflected = reflect(ray_in.direction(), &rec.normal);
-        *scattered = Ray::new(rec.p, reflected);
-        *attenuation = self.albedo.clone();
-        dot(&scattered.direction, &rec.normal) > 0.0
+        let res = MaterialResult::new(self.albedo.clone(), Ray::new(rec.p, reflected));
+        if dot(&res.scattered.direction(), &rec.normal) > 0.0 {
+            return Some(res);
+        }
+        None
     }
 }
 

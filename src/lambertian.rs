@@ -1,4 +1,4 @@
-use material::Material;
+use material::{Material, MaterialResult};
 use vec3::{Vec3, dot};
 use ray::Ray;
 use hitable::HitRecord;
@@ -19,11 +19,9 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, ray_in: &Ray, rec: &HitRecord, attenuation: &mut Vec3, scattered: &mut Ray) -> bool {
+    fn scatter(&self, _ray_in: &Ray, rec: &HitRecord) -> Option<MaterialResult> {
         let target = rec.p + rec.normal + random_in_unit_sphere();
-        *scattered = Ray::new(rec.p, target - rec.p);
-        *attenuation = self.albedo.clone();
-        true
+        Some(MaterialResult::new(self.albedo.clone(), Ray::new(rec.p, target - rec.p)))
     }
 }
 
