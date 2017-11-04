@@ -1,5 +1,5 @@
-use material::{Material, MaterialResult};
-use vec3::{Vec3, dot};
+use material::{Material, MaterialResult, random_in_unit_sphere};
+use vec3::Vec3;
 use ray::Ray;
 use hitable::HitRecord;
 
@@ -25,11 +25,3 @@ impl Material for Lambertian {
     }
 }
 
-pub fn random_in_unit_sphere() -> Vec3 {
-    loop {
-        let p = 2.0 * Vec3::new(rand::random::<f32>(), rand::random::<f32>(), rand::random::<f32>()) - Vec3::new(1.0, 1.0, 1.0);
-        if dot(&p, &p) >= 1.0 {
-            return p;
-        }
-    }
-}
