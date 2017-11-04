@@ -4,6 +4,9 @@ mod hitable;
 mod sphere;
 mod hitable_list;
 mod camera;
+mod material;
+mod lambertian;
+mod metal;
 
 use vec3::{Vec3, dot};
 use ray::Ray;
@@ -11,17 +14,9 @@ use hitable_list::HitableList;
 use sphere::Sphere;
 use hitable::{HitRecord, Hitable};
 use camera::Camera;
+use lambertian::random_in_unit_sphere;
 
 extern crate rand;
-
-fn random_in_unit_sphere() -> Vec3 {
-    loop {
-        let p = 2.0 * Vec3::new(rand::random::<f32>(), rand::random::<f32>(), rand::random::<f32>()) - Vec3::new(1.0, 1.0, 1.0);
-        if dot(&p, &p) >= 1.0 {
-            return p;
-        }
-    }
-}
 
 fn color(ray: Ray, world: &Hitable) -> Vec3 {
     let mut rec : HitRecord = Default::default();
