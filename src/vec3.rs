@@ -319,6 +319,6 @@ fn vec3_access() {
     assert!(a[0] == 1.0);
     assert!(a[1] == 2.0);
     assert!(a[2] == 3.0);
-    let result = std::panic::catch_unwind(|| {a[3]});
+    let result = std::panic::catch_unwind(|| a[3]);
     assert!(result.is_err());
 }
