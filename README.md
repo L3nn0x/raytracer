@@ -1,9 +1,9 @@
-#Raytracer
+# Raytracer
 
 A simple raytracer in Rust to learn the language.
 
 ---
-##Features implemented:
+## Features implemented:
 - Antialiasing
 - Diffuse materials
 - Metal materials
@@ -13,7 +13,7 @@ A simple raytracer in Rust to learn the language.
 - Motion blur
 
 ---
-##Sample output
+## Sample output
 
 Here is a sample output:
 ![Sample output](https://raw.githubusercontent.com/L3nn0x/raytracer/master/img.jpg)
