@@ -10,6 +10,7 @@ mod metal;
 mod dielectric;
 mod aabb;
 mod bvh;
+mod texture;
 
 use vec3::{Vec3, unit_vector};
 use ray::Ray;
@@ -20,6 +21,7 @@ use camera::Camera;
 use lambertian::Lambertian;
 use metal::Metal;
 use dielectric::Dielectric;
+use texture::{ConstantTexture, CheckerTexture};
 
 use std::sync::Arc;
 
@@ -33,7 +35,11 @@ use rayon::prelude::*;
 
 fn random_scene() -> HitableList {
     let mut objs: Vec<Box<Hitable>> = vec![
-        Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Arc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)))))
+        Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Arc::new(Lambertian::new(
+                        Box::new(CheckerTexture::new(
+                                Box::new(ConstantTexture::new(Vec3::new(0.2, 0.3, 0.1))),
+                                Box::new(ConstantTexture::new(Vec3::new(0.9, 0.9, 0.9)))
+                                ))))))
     ];
     for a in -11..11 {
         for b in -11..11 {
@@ -43,10 +49,10 @@ fn random_scene() -> HitableList {
                 let rd = rand::random::<f32>();
                 let obj:Box<Hitable> = if rd < 0.8 { // diffuse
                     Box::new(MovingSphere::new(center, center_end, 0.2, 0.0, 1.0,
-                    Arc::new(Lambertian::new(Vec3::new(
+                    Arc::new(Lambertian::new(Box::new(ConstantTexture::new(Vec3::new(
                             rand::random::<f64>() * rand::random::<f64>(),
                             rand::random::<f64>() * rand::random::<f64>(),
-                            rand::random::<f64>() * rand::random::<f64>())))))
+                            rand::random::<f64>() * rand::random::<f64>())))))))
                 } else if rd < 0.95 { // metal
                     Box::new(Sphere::new(center, 0.2, Arc::new(Metal::new(Vec3::new(
                             0.5 * (1.0 + rand::random::<f64>()),
@@ -61,7 +67,7 @@ fn random_scene() -> HitableList {
         }
     }
     objs.push(Box::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, Arc::new(Dielectric::new(1.5)))));
-    objs.push(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Arc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))))));
+    objs.push(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Arc::new(Lambertian::new(Box::new(ConstantTexture::new(Vec3::new(0.4, 0.2, 0.1))))))));
     objs.push(Box::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, Arc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0)))));
     HitableList::new(objs)
 }
@@ -76,7 +82,7 @@ fn color(ray: Ray, world: &Hitable, depth: i32) -> Vec3 {
             }
         }
     }
-    let u = unit_vector(&ray.direction);
+    let u = unit_vector(ray.direction);
     let t = 0.5 * (u.y + 1.0);
     (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
 }
@@ -86,8 +92,10 @@ fn main() {
     let ny = 800;
     let ns = 10;
     /*let objs: Vec<Box<Hitable>> = vec![
-        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Arc::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5))))),
-        Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Arc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))))),
+        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Arc::new(
+                    Lambertian::new(Box::new(ConstantTexture::new(Vec3::new(0.1, 0.2, 0.5))))))),
+					Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Arc::new(
+                    Lambertian::new(Box::new(ConstantTexture::new(Vec3::new(0.8, 0.8, 0.0))))))),
         Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Arc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.2)))),
         Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Arc::new(Dielectric::new(1.5)))),
         Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, Arc::new(Dielectric::new(1.5)))),

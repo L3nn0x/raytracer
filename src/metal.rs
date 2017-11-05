@@ -27,7 +27,7 @@ impl Material for Metal {
         let reflected = reflect(&ray_in.direction, &rec.normal);
         let reflected = reflected + self.fuzzy as f64 * random_in_unit_sphere();
         let res = MaterialResult::new(self.albedo.clone(), Ray::new(rec.p, reflected, ray_in.time));
-        if dot(&unit_vector(&res.scattered.direction), &rec.normal) > 0.0 {
+        if dot(&unit_vector(res.scattered.direction), &rec.normal) > 0.0 {
             Some(res)
         } else {
             None
