@@ -1,5 +1,4 @@
 use std::ops::{Neg, AddAssign, SubAssign, MulAssign, DivAssign, Add, Sub, Mul, Div, Index};
-use std;
 
 #[derive(Debug, Default, PartialEq, Copy, Clone)]
 pub struct Vec3 {
@@ -43,8 +42,8 @@ pub fn dot(v1: &Vec3, v2: &Vec3) -> f64 {
     v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
 }
 
-pub fn unit_vector(v: &Vec3) -> Vec3 {
-    let mut tmp = v.clone();
+pub fn unit_vector(v: Vec3) -> Vec3 {
+    let mut tmp = v;
     tmp.make_unit();
     tmp
 }
@@ -306,7 +305,7 @@ fn vec3_make_unit() {
 #[test]
 fn vec3_unit_vector() {
     let a = Vec3::new(1.0, 1.0, 1.0);
-    let a = unit_vector(&a);
+    let a = unit_vector(a);
     assert!(a.length() == 1.0);
     let mut a = Vec3::new(1.0, 1.0, 1.0);
     a.make_unit();
@@ -319,6 +318,6 @@ fn vec3_access() {
     assert!(a[0] == 1.0);
     assert!(a[1] == 2.0);
     assert!(a[2] == 3.0);
-    let result = std::panic::catch_unwind(|| a[3]);
+    let result = ::std::panic::catch_unwind(|| a[3]);
     assert!(result.is_err());
 }

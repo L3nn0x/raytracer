@@ -41,7 +41,7 @@ impl Material for Dielectric {
 }
 
 fn refract(v: &Vec3, n: &Vec3, ni_over_nt: f64) -> Option<Vec3> {
-    let uv = unit_vector(v);
+    let uv = unit_vector(*v);
     let dt = dot(&uv, &n);
     let discriminant = 1.0 - ni_over_nt * ni_over_nt * (1.0 - dt * dt);
     if discriminant > 0.0 {

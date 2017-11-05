@@ -1,5 +1,4 @@
 use material::{Material, MaterialResult, random_in_unit_sphere};
-use vec3::Vec3;
 use ray::Ray;
 use hitable::HitRecord;
 use texture::Texture;
