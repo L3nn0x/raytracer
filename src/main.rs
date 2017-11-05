@@ -21,8 +21,11 @@ use dielectric::Dielectric;
 
 use std::sync::Arc;
 
+extern crate image;
 extern crate rand;
 extern crate rayon;
+
+use image::Rgb;
 
 use rayon::prelude::*;
 
@@ -96,11 +99,10 @@ fn main() {
     let aperture = 0.1;
     let cam = Camera::new(look_from, look_at, Vec3::new(0.0, 1.0, 0.0), 20.0,
                         nx as f64 / ny as f64, aperture, dist_to_focus, 0.0, 1.0);
-    type Color = (i32, i32, i32);
-    let mut pixels = vec![Color::default(); nx * ny];
+    let mut pixels = vec![Rgb { data: [0; 3] }; nx * ny];
     pixels.par_iter_mut().enumerate().for_each(|(idx, c)| {
         let i = idx % nx;
-        let j = idx / nx;
+        let j = ny - 1 - idx / nx;
 
         let mut col: Vec3 = Default::default();
         for _k in 0..ns {
@@ -111,15 +113,18 @@ fn main() {
         }
         col /= ns as f64;
         let col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());
-        let ir = (255.99 * col.x) as i32;
-        let ig = (255.99 * col.y) as i32;
-        let ib = (255.99 * col.z) as i32;
-        *c = (ir, ig, ib);
+        let ir = (255.99 * col.x) as u8;
+        let ig = (255.99 * col.y) as u8;
+        let ib = (255.99 * col.z) as u8;
+        *c = Rgb {
+            data: [ir, ig, ib],
+        };
     });
-    for j in (0..ny - 1).rev() {
+    let mut image = image::ImageBuffer::new(nx as u32, ny as u32);
+    for j in 0..ny {
         for i in 0..nx {
-            let (ir, ig, ib) = pixels[i + j * nx];
-            println!("{} {} {}", ir, ig, ib);
+            image.put_pixel(i as u32, j as u32, pixels[i + j * nx]);
         }
     }
+    image.save("img.png").unwrap();
 }
