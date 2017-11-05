@@ -10,6 +10,7 @@ mod metal;
 mod dielectric;
 mod aabb;
 mod bvh;
+mod texture;
 
 use vec3::{Vec3, unit_vector};
 use ray::Ray;
@@ -20,6 +21,7 @@ use camera::Camera;
 use lambertian::Lambertian;
 use metal::Metal;
 use dielectric::Dielectric;
+use texture::ConstantTexture;
 
 use std::sync::Arc;
 
@@ -27,7 +29,7 @@ extern crate rand;
 extern crate rayon;
 
 use rayon::prelude::*;
-
+/*
 fn random_scene() -> HitableList {
     let mut objs: Vec<Box<Hitable>> = vec![
         Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Arc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)))))
@@ -61,7 +63,7 @@ fn random_scene() -> HitableList {
     objs.push(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Arc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))))));
     objs.push(Box::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, Arc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0)))));
     HitableList::new(objs)
-}
+}*/
 
 fn color(ray: Ray, world: &Hitable, depth: i32) -> Vec3 {
     if let Some(rec) = world.hit(&ray, 0.001, 10000.0) {
@@ -79,19 +81,21 @@ fn color(ray: Ray, world: &Hitable, depth: i32) -> Vec3 {
 }
 
 fn main() {
-    let nx = 1200;
-    let ny = 800;
+    let nx = 200;
+    let ny = 100;
     let ns = 10;
     println!("P3\n{} {}\n255", nx, ny);
-    /*let objs: Vec<Box<Hitable>> = vec![
-        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Arc::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5))))),
-        Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Arc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))))),
+    let objs: Vec<Box<Hitable>> = vec![
+        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Arc::new(
+                    Lambertian::new(Box::new(ConstantTexture::new(Vec3::new(0.1, 0.2, 0.5))))))),
+					Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Arc::new(
+                    Lambertian::new(Box::new(ConstantTexture::new(Vec3::new(0.8, 0.8, 0.0))))))),
         Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Arc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.2)))),
         Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Arc::new(Dielectric::new(1.5)))),
         Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, Arc::new(Dielectric::new(1.5)))),
     ];
-    let world = HitableList::new(objs);*/
-    let world = random_scene();
+    let world = HitableList::new(objs);
+    //let world = random_scene();
     let look_from = Vec3::new(13.0, 2.0, 3.0);
     let look_at = Vec3::new(0.0, 0.0, 0.0);
     let dist_to_focus = 10.0;
