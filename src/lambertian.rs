@@ -2,15 +2,16 @@ use material::{Material, MaterialResult, random_in_unit_sphere};
 use ray::Ray;
 use hitable::HitRecord;
 use texture::Texture;
+use std::sync::Arc;
 
 extern crate rand;
 
 pub struct Lambertian {
-    albedo: Box<Texture> 
+    albedo: Arc<Texture> 
 }
 
 impl Lambertian {
-    pub fn new(albedo: Box<Texture>) -> Lambertian {
+    pub fn new(albedo: Arc<Texture>) -> Lambertian {
         Lambertian{
             albedo: albedo
         }
