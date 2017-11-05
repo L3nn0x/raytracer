@@ -1,11 +1,11 @@
-use vec3::Vec3;
+use vec3::{Vec3, dot, unit_vector};
 
 extern crate rand;
 
 use rand::{random, thread_rng, Rng};
 
 pub struct Perlin {
-    ranfloat: [f64; 256],
+    ranfloat: [Vec3; 256],
     perm_x: [u8; 256],
     perm_y: [u8; 256],
     perm_z: [u8; 256]
@@ -22,7 +22,7 @@ impl Perlin {
         let i = p.x.floor() as usize;
         let j = p.y.floor() as usize;
         let k = p.z.floor() as usize;
-        let mut c = [[[0.0; 2]; 2]; 2];
+        let mut c = [[[Default::default(); 2]; 2]; 2];
         for di in 0..2 {
             for dj in 0..2 {
                 for dk in 0..2 {
@@ -45,10 +45,12 @@ impl Perlin {
     }
 }
 
-fn perlin_generate() -> [f64; 256] {
-    let mut p = [0.0; 256];
+fn perlin_generate() -> [Vec3; 256] {
+    let mut p = [Default::default(); 256];
     for i in 0..256 {
-        p[i] = rand::random::<f64>();
+        p[i] = unit_vector(Vec3::new(-1.0 + 2.0 * rand::random::<f64>(),
+                                    -1.0 + 2.0 * rand::random::<f64>(),
+                                    -1.0 + 2.0 * rand::random::<f64>()));
     }
     p
 }
@@ -69,14 +71,18 @@ fn perlin_generate_perm() -> [u8; 256] {
     p
 }
 
-fn trilinear_interp(c: [[[f64; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {
+fn trilinear_interp(c: [[[Vec3; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {
+    let uu = u * u * (3.0 - 2.0 * u);
+    let vv = v * v * (3.0 - 2.0 * v);
+    let ww = w * w * (3.0 - 2.0 * w);
     let mut accum: f64 = 0.0;
     for i in 0..2 {
         for j in 0..2 {
             for k in 0..2 {
-                accum += (i as f64 * u + (1.0 - i as f64) * (1.0 - u)) *
-                         (j as f64 * v + (1.0 - j as f64) * (1.0 - v)) *
-                         (k as f64 * w + (1.0 - k as f64) * (1.0 - w)) * c[i][j][k];
+                let weight = Vec3::new(u - i as f64, v - j as f64, w - k as f64);
+                accum += (i as f64 * uu + (1.0 - i as f64) * (1.0 - uu)) *
+                         (j as f64 * vv + (1.0 - j as f64) * (1.0 - vv)) *
+                         (k as f64 * ww + (1.0 - k as f64) * (1.0 - ww)) * dot(&c[i][j][k], &weight);
             }
         }
     }

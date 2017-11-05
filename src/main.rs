@@ -5,8 +5,7 @@ mod sphere;
 mod hitable_list;
 mod camera;
 mod material;
-mod lambertian;
-mod metal;
+mod lambertian; mod metal;
 mod dielectric;
 mod aabb;
 mod bvh;
@@ -103,7 +102,7 @@ fn main() {
     ];
     let world = HitableList::new(objs);*/
     //let world = random_scene();
-    let tex = Arc::new(NoiseTexture::new(5.0));
+    let tex = Arc::new(NoiseTexture::new(10.0));
     let objs: Vec<Box<Hitable>> = vec![
         Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Arc::new(Lambertian::new(tex.clone())))),
         Box::new(Sphere::new(Vec3::new(0.0, 2.0, 0.0), 2.0, Arc::new(Lambertian::new(tex.clone()))))
