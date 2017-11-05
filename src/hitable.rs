@@ -1,6 +1,7 @@
 use vec3::Vec3;
 use ray::Ray;
 use material::Material;
+use aabb::AABB;
 
 use std::rc::Rc;
 
@@ -24,4 +25,5 @@ impl HitRecord {
 
 pub trait Hitable {
     fn hit(&self, ray: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord>;
+    fn bounding_box(&self, t0: f32, t1: f32) -> Option<AABB>;
 }

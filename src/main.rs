@@ -8,6 +8,7 @@ mod material;
 mod lambertian;
 mod metal;
 mod dielectric;
+mod aabb;
 
 use vec3::{Vec3, unit_vector};
 use ray::Ray;

@@ -2,6 +2,7 @@ use hitable::{HitRecord, Hitable};
 use ray::Ray;
 use vec3::{Vec3, dot};
 use material::Material;
+use aabb::{AABB, surrounding_box};
 
 use std::rc::Rc;
 
@@ -51,6 +52,11 @@ impl Hitable for Sphere {
         }
         None
     }
+
+    fn bounding_box(&self, _t0: f32, _t1: f32) -> Option<AABB> {
+        Some(AABB::new(self.center - Vec3::new(self.radius, self.radius, self.radius),
+                        self.center + Vec3::new(self.radius, self.radius, self.radius)))
+    }
 }
 
 impl MovingSphere {
@@ -91,5 +97,13 @@ impl Hitable for MovingSphere {
             }
         }
         None
+    }
+
+    fn bounding_box(&self, t0: f32, t1: f32) -> Option<AABB> {
+        let b0 = AABB::new(self.center(t0) - Vec3::new(self.radius, self.radius, self.radius),
+                            self.center(t0) - Vec3::new(self.radius, self.radius, self.radius));
+        let b1 = AABB::new(self.center(t1) - Vec3::new(self.radius, self.radius, self.radius),
+                            self.center(t1) - Vec3::new(self.radius, self.radius, self.radius));
+        Some(surrounding_box(b0, b1))
     }
 }
