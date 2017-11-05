@@ -28,7 +28,7 @@ impl AABB {
         for a in 0..3 {
             let inv_d = 1.0 / ray.direction[a];
             let mut t0 = (self.min[a] - ray.origin[a]) * inv_d;
-            let mut t1 = (self.min[a] - ray.origin[a]) * inv_d;
+            let mut t1 = (self.max[a] - ray.origin[a]) * inv_d;
             if inv_d < 0.0 {
                 std::mem::swap(&mut t0, &mut t1);
             }
