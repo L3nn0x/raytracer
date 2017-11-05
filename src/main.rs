@@ -85,7 +85,6 @@ fn main() {
     let nx = 1200;
     let ny = 800;
     let ns = 10;
-    println!("P3\n{} {}\n255", nx, ny);
     /*let objs: Vec<Box<Hitable>> = vec![
         Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Arc::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5))))),
         Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Arc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))))),
