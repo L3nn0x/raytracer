@@ -2,11 +2,13 @@ use vec3::Vec3;
 
 extern crate rand;
 
+use rand::{random, thread_rng, Rng};
+
 pub struct Perlin {
     ranfloat: [f64; 256],
-    perm_x: [i8; 256],
-    perm_y: [i8; 256],
-    perm_z: [i8; 256]
+    perm_x: [u8; 256],
+    perm_y: [u8; 256],
+    perm_z: [u8; 256]
 }
 
 impl Perlin {
@@ -31,25 +33,19 @@ impl Perlin {
 }
 
 fn perlin_generate() -> [f64; 256] {
-    let mut p: [f64; 256];
+    let mut p = [0.0; 256];
     for i in 0..256 {
         p[i] = rand::random::<f64>();
     }
     p
 }
 
-fn permute(&mut p: [i8; 256]) {
-    for i in (0..256).rev() {
-        let target = (rand::random::<f64>() * (i + 1) as f64) as i8;
-        ::std::mem::swap(&mut p[target], &mut p[i]);
-    }
-}
-
-fn perlin_generate_perm() -> [i8; 256] {
-    let mut p: [i8; 256];
+fn perlin_generate_perm() -> [u8; 256] {
+    let mut p = [0; 256];
     for i in 0..256 {
-        p[i] = i as i8;
+        p[i] = i as u8;
     }
-    permute(&mut p);
+    let mut rng = thread_rng();
+    rng.shuffle(&mut p);
     p
 }
