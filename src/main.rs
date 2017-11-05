@@ -21,13 +21,16 @@ use lambertian::Lambertian;
 use metal::Metal;
 use dielectric::Dielectric;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 extern crate rand;
+extern crate rayon;
+
+use rayon::prelude::*;
 
 fn random_scene() -> HitableList {
     let mut objs: Vec<Box<Hitable>> = vec![
-        Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Rc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)))))
+        Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Arc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)))))
     ];
     for a in -11..11 {
         for b in -11..11 {
@@ -37,26 +40,26 @@ fn random_scene() -> HitableList {
                 let rd = rand::random::<f32>();
                 let obj:Box<Hitable> = if rd < 0.8 { // diffuse
                     Box::new(MovingSphere::new(center, center_end, 0.2, 0.0, 1.0,
-                    Rc::new(Lambertian::new(Vec3::new(
+                    Arc::new(Lambertian::new(Vec3::new(
                             rand::random::<f64>() * rand::random::<f64>(),
                             rand::random::<f64>() * rand::random::<f64>(),
                             rand::random::<f64>() * rand::random::<f64>())))))
                 } else if rd < 0.95 { // metal
-                    Box::new(Sphere::new(center, 0.2, Rc::new(Metal::new(Vec3::new(
+                    Box::new(Sphere::new(center, 0.2, Arc::new(Metal::new(Vec3::new(
                             0.5 * (1.0 + rand::random::<f64>()),
                             0.5 * (1.0 + rand::random::<f64>()),
                             0.5 * (1.0 + rand::random::<f64>())),
                             0.5 * rand::random::<f32>()))))
                 } else { // glass
-                    Box::new(Sphere::new(center, 0.2, Rc::new(Dielectric::new(1.5))))
+                    Box::new(Sphere::new(center, 0.2, Arc::new(Dielectric::new(1.5))))
                 };
                 objs.push(obj);
             }
         }
     }
-    objs.push(Box::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, Rc::new(Dielectric::new(1.5)))));
-    objs.push(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Rc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))))));
-    objs.push(Box::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, Rc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0)))));
+    objs.push(Box::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, Arc::new(Dielectric::new(1.5)))));
+    objs.push(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Arc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))))));
+    objs.push(Box::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, Arc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0)))));
     HitableList::new(objs)
 }
 
@@ -81,11 +84,11 @@ fn main() {
     let ns = 10;
     println!("P3\n{} {}\n255", nx, ny);
     /*let objs: Vec<Box<Hitable>> = vec![
-        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Rc::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5))))),
-        Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))))),
-        Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.2)))),
-        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Rc::new(Dielectric::new(1.5)))),
-        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, Rc::new(Dielectric::new(1.5)))),
+        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Arc::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5))))),
+        Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Arc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))))),
+        Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Arc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.2)))),
+        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Arc::new(Dielectric::new(1.5)))),
+        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, Arc::new(Dielectric::new(1.5)))),
     ];
     let world = HitableList::new(objs);*/
     let world = random_scene();
@@ -95,20 +98,29 @@ fn main() {
     let aperture = 0.1;
     let cam = Camera::new(look_from, look_at, Vec3::new(0.0, 1.0, 0.0), 20.0,
                         nx as f64 / ny as f64, aperture, dist_to_focus, 0.0, 1.0);
+    type Color = (i32, i32, i32);
+    let mut pixels = vec![Color::default(); nx * ny];
+    pixels.par_iter_mut().enumerate().for_each(|(idx, c)| {
+        let i = idx % nx;
+        let j = idx / nx;
+
+        let mut col: Vec3 = Default::default();
+        for _k in 0..ns {
+            let u = (rand::random::<f64>() + i as f64) / nx as f64;
+            let v = (rand::random::<f64>() + j as f64) / ny as f64;
+            let ray = cam.get_ray(u, v);
+            col += color(ray, &world, 0);
+        }
+        col /= ns as f64;
+        let col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());
+        let ir = (255.99 * col.x) as i32;
+        let ig = (255.99 * col.y) as i32;
+        let ib = (255.99 * col.z) as i32;
+        *c = (ir, ig, ib);
+    });
     for j in (0..ny - 1).rev() {
         for i in 0..nx {
-            let mut col: Vec3 = Default::default();
-            for _k in 0..ns {
-                let u = (rand::random::<f64>() + i as f64) / nx as f64;
-                let v = (rand::random::<f64>() + j as f64) / ny as f64;
-                let ray = cam.get_ray(u, v);
-                col += color(ray, &world, 0);
-            }
-            col /= ns as f64;
-            let col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());
-            let ir = (255.99 * col.x) as i32;
-            let ig = (255.99 * col.y) as i32;
-            let ib = (255.99 * col.z) as i32;
+            let (ir, ig, ib) = pixels[i + j * nx];
             println!("{} {} {}", ir, ig, ib);
         }
     }

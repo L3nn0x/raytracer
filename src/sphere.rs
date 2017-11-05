@@ -4,12 +4,12 @@ use vec3::{Vec3, dot};
 use material::Material;
 use aabb::{AABB, surrounding_box};
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f64,
-    pub mat: Rc<Material>
+    pub mat: Arc<Material>
 }
 
 pub struct MovingSphere {
@@ -18,11 +18,11 @@ pub struct MovingSphere {
     time0: f32,
     time1: f32,
     pub radius: f64,
-    pub mat: Rc<Material>
+    pub mat: Arc<Material>
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64, mat: Rc<Material>) -> Sphere {
+    pub fn new(center: Vec3, radius: f64, mat: Arc<Material>) -> Sphere {
         Sphere{
             center: center,
             radius: radius,
@@ -61,7 +61,7 @@ impl Hitable for Sphere {
 
 impl MovingSphere {
     pub fn new(center0: Vec3, center1: Vec3, radius: f64, time0: f32, time1: f32,
-               mat: Rc<Material>) -> MovingSphere {
+               mat: Arc<Material>) -> MovingSphere {
         MovingSphere{
             center0: center0,
             center1: center1,

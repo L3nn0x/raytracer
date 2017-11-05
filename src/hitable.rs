@@ -3,17 +3,17 @@ use ray::Ray;
 use material::Material;
 use aabb::AABB;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub struct HitRecord {
     pub t: f64,
     pub p: Vec3,
     pub normal: Vec3,
-    pub mat: Rc<Material>
+    pub mat: Arc<Material>
 }
 
 impl HitRecord {
-    pub fn new(t: f64, p: Vec3, normal: Vec3, mat: Rc<Material>) -> HitRecord {
+    pub fn new(t: f64, p: Vec3, normal: Vec3, mat: Arc<Material>) -> HitRecord {
         HitRecord{
             t: t,
             p: p,
@@ -23,7 +23,7 @@ impl HitRecord {
     }
 }
 
-pub trait Hitable {
+pub trait Hitable: Sync {
     fn hit(&self, ray: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord>;
     fn bounding_box(&self, t0: f32, t1: f32) -> Option<AABB>;
 }

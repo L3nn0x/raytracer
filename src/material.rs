@@ -18,7 +18,7 @@ impl MaterialResult {
     }
 }
 
-pub trait Material {
+pub trait Material: Sync + Send {
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<MaterialResult>;
 }
 
