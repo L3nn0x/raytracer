@@ -7,6 +7,7 @@ mod camera;
 mod material;
 mod lambertian;
 mod metal;
+mod dielectric;
 
 use vec3::Vec3;
 use ray::Ray;
@@ -16,6 +17,7 @@ use hitable::Hitable;
 use camera::Camera;
 use lambertian::Lambertian;
 use metal::Metal;
+use dielectric::Dielectric;
 
 use std::rc::Rc;
 
@@ -33,8 +35,7 @@ fn color(ray: Ray, world: &Hitable, depth: i32) -> Vec3 {
     }
     let u = ray.direction();
     let t = 0.5 * (u.y + 1.0);
-    (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) +
-        t * Vec3::new(0.5, 0.7, 1.0)
+    (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
 }
 
 fn main() {
@@ -43,10 +44,11 @@ fn main() {
     let ns = 100;
     println!("P3\n{} {}\n255", nx, ny);
     let objs: Vec<Box<Hitable>> = vec![
-        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Rc::new(Lambertian::new(Vec3::new(0.8, 0.3, 0.3))))),
+        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Rc::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5))))),
         Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))))),
-        Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.3)))),
-        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Rc::new(Metal::new(Vec3::new(0.8, 0.8, 0.8), 1.0)))),
+        Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0)))),
+        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Rc::new(Dielectric::new(1.5)))),
+        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, Rc::new(Dielectric::new(1.5)))),
     ];
     let world = HitableList::new(objs);
     let cam = Camera::new();
@@ -54,12 +56,12 @@ fn main() {
         for i in 0..nx {
             let mut col: Vec3 = Default::default();
             for _k in 0..ns {
-                let u = (rand::random::<f32>() + i as f32) / nx as f32;
-                let v = (rand::random::<f32>() + j as f32) / ny as f32;
+                let u = (rand::random::<f64>() + i as f64) / nx as f64;
+                let v = (rand::random::<f64>() + j as f64) / ny as f64;
                 let ray = cam.get_ray(u, v);
                 col += color(ray, &world, 0);
             }
-            col /= ns as f32;
+            col /= ns as f64;
             let col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());
             let ir = (255.99 * col.x) as i32;
             let ig = (255.99 * col.y) as i32;

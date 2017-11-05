@@ -1,9 +1,8 @@
-use material::{Material, MaterialResult, random_in_unit_sphere};
+use material::{Material, MaterialResult, random_in_unit_sphere, reflect};
 use vec3::{Vec3, dot};
 use ray::Ray;
 use hitable::HitRecord;
 
-#[derive(Clone)]
 pub struct Metal {
     albedo: Vec3,
     fuzzy: f32
@@ -25,16 +24,13 @@ impl Metal {
 
 impl Material for Metal {
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<MaterialResult> {
-        let reflected = reflect(ray_in.direction(), &rec.normal);
-        let reflected = reflected + self.fuzzy * random_in_unit_sphere();
+        let reflected = reflect(&ray_in.direction, &rec.normal);
+        let reflected = reflected + self.fuzzy as f64 * random_in_unit_sphere();
         let res = MaterialResult::new(self.albedo.clone(), Ray::new(rec.p, reflected));
         if dot(&res.scattered.direction(), &rec.normal) > 0.0 {
-            return Some(res);
+            Some(res)
+        } else {
+            None
         }
-        None
     }
-}
-
-fn reflect(v: Vec3, n: &Vec3) -> Vec3 {
-    v - 2.0 * dot(&v, &n) * *n
 }

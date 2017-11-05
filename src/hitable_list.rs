@@ -14,7 +14,7 @@ impl HitableList {
 }
 
 impl Hitable for HitableList {
-    fn hit(&self, ray: &Ray, tmin: f32, tmax: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
         let mut rec: Option<HitRecord> = None;
         let mut closest = tmax;
         for elem in self.list.iter() {

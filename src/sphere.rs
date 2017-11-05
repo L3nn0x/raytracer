@@ -7,12 +7,12 @@ use std::rc::Rc;
 
 pub struct Sphere {
     pub center: Vec3,
-    pub radius: f32,
+    pub radius: f64,
     pub mat: Rc<Material>
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f32, mat: Rc<Material>) -> Sphere {
+    pub fn new(center: Vec3, radius: f64, mat: Rc<Material>) -> Sphere {
         Sphere{
             center: center,
             radius: radius,
@@ -22,7 +22,7 @@ impl Sphere {
 }
 
 impl Hitable for Sphere {
-    fn hit(&self, ray: &Ray, tmin: f32, tmax: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
         let oc = ray.origin - self.center;
         let a = dot(&ray.direction, &ray.direction);
         let b = dot(&oc, &ray.direction);
