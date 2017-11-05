@@ -1,4 +1,5 @@
-use std::ops::{Neg, AddAssign, SubAssign, MulAssign, DivAssign, Add, Sub, Mul, Div};
+use std::ops::{Neg, AddAssign, SubAssign, MulAssign, DivAssign, Add, Sub, Mul, Div, Index};
+use std;
 
 #[derive(Debug, Default, PartialEq, Copy, Clone)]
 pub struct Vec3 {
@@ -46,6 +47,18 @@ pub fn unit_vector(v: &Vec3) -> Vec3 {
     let mut tmp = v.clone();
     tmp.make_unit();
     tmp
+}
+
+impl Index<i32> for Vec3 {
+    type Output = f64;
+    fn index(&self, index: i32) -> &f64 {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => panic!("Tried to access out of bound vector")
+        }
+    }
 }
 
 impl Div for Vec3 {
@@ -298,4 +311,14 @@ fn vec3_unit_vector() {
     let mut a = Vec3::new(1.0, 1.0, 1.0);
     a.make_unit();
     assert!(a.length() == 1.0);
+}
+
+#[test]
+fn vec3_access() {
+    let a = Vec3::new(1.0, 2.0, 3.0);
+    assert!(a[0] == 1.0);
+    assert!(a[1] == 2.0);
+    assert!(a[2] == 3.0);
+    let result = std::panic::catch_unwind(|| {a[3]});
+    assert!(result.is_err());
 }
