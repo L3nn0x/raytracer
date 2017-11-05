@@ -6,12 +6,14 @@ use aabb::{AABB, surrounding_box};
 
 use std::sync::Arc;
 
+#[derive(Clone)]
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f64,
     pub mat: Arc<Material>
 }
 
+#[derive(Clone)]
 pub struct MovingSphere {
     center0: Vec3,
     center1: Vec3,
@@ -56,6 +58,10 @@ impl Hitable for Sphere {
     fn bounding_box(&self, _t0: f32, _t1: f32) -> Option<AABB> {
         Some(AABB::new(self.center - Vec3::new(self.radius, self.radius, self.radius),
                         self.center + Vec3::new(self.radius, self.radius, self.radius)))
+    }
+
+    fn box_clone(&self) -> Box<Hitable> {
+        Box::new((*self).clone())
     }
 }
 
@@ -105,5 +111,9 @@ impl Hitable for MovingSphere {
         let b1 = AABB::new(self.center(t1) - Vec3::new(self.radius, self.radius, self.radius),
                             self.center(t1) - Vec3::new(self.radius, self.radius, self.radius));
         Some(surrounding_box(b0, b1))
+    }
+
+    fn box_clone(&self) -> Box<Hitable> {
+        Box::new((*self).clone())
     }
 }

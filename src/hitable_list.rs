@@ -2,6 +2,7 @@ use hitable::{HitRecord, Hitable};
 use ray::Ray;
 use aabb::{AABB, surrounding_box};
 
+#[derive(Clone)]
 pub struct HitableList {
     list: Vec<Box<Hitable>>
 }
@@ -40,5 +41,9 @@ impl Hitable for HitableList {
             }
         }
         None
+    }
+
+    fn box_clone(&self) -> Box<Hitable> {
+        Box::new((*self).clone())
     }
 }

@@ -1,4 +1,5 @@
 use std::ops::{Neg, AddAssign, SubAssign, MulAssign, DivAssign, Add, Sub, Mul, Div, Index};
+use std;
 
 #[derive(Debug, Default, PartialEq, Copy, Clone)]
 pub struct Vec3 {

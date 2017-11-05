@@ -1,9 +1,11 @@
 use aabb::{AABB, surrounding_box};
 use hitable::{Hitable, HitRecord};
 use ray::Ray;
+use std::cmp::Ordering;
 
 extern crate rand;
 
+#[derive(Clone)]
 pub struct BVHNode {
     left: Box<Hitable>,
     right: Box<Hitable>,
@@ -15,21 +17,25 @@ impl BVHNode {
         let mut objs = objs;
         let axis = (3.0 * rand::random::<f32>()) as i32;
         objs.sort_by(|a, b| {
-            let l = a.bounding_box(0, 0).unwrap();
-            let r = b.bounding_box(0, 0).unwrap();
-            l.min()[axis].cmp(r.min()[axis])
+            let l = a.bounding_box(0.0, 0.0).unwrap();
+            let r = b.bounding_box(0.0, 0.0).unwrap();
+            if l.min()[axis] - r.min()[axis] < 0.0 {
+                Ordering::Less
+            } else {
+                Ordering::Greater
+            }
         });
-        let mut left: Box<Hitable>;
-        let mut rght: Box<Hitable>;
+        let left: Box<Hitable>;
+        let right: Box<Hitable>;
         if objs.len() == 1 {
             left = objs[0].clone();
             right = objs[0].clone();
         } else if objs.len() == 2 {
-            left = objs[0];
-            right = objs[1];
+            left = objs[0].clone();
+            right = objs[1].clone();
         } else {
-            left = BVHNode::new(&objs[..objs.len() / 2], t0, t1);
-            right = BVHNode::new(&objs[objs.len() / 2..], t0, t1);
+            left = Box::new(BVHNode::new(objs[..objs.len() / 2].to_vec(), t0, t1));
+            right = Box::new(BVHNode::new(objs[objs.len() / 2..].to_vec(), t0, t1));
         }
         let box_left = left.bounding_box(t0, t1).unwrap();
         let box_right = left.bounding_box(t0, t1).unwrap();
@@ -43,20 +49,24 @@ impl BVHNode {
 
 impl Hitable for BVHNode {
     fn hit(&self, ray: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
-        if self.bounding_box.hit(tmin, tmax) {
+        if self.bounding_box.hit(&ray, tmin as f32, tmax as f32) {
             let left = self.left.hit(&ray, tmin, tmax);
             let right = self.right.hit(&ray, tmin, tmax);
-            match (left, right) {
-                (Some(l), Some(r)) => if l.t < r.t { left } else { right },
-                (Some(_), None) => left,
-                (None, Some(_)) => right,
+            return match (left, right) {
+                (Some(l), Some(r)) => if l.t < r.t { Some(l) } else { Some(r) },
+                (Some(l), None) => Some(l),
+                (None, Some(r)) => Some(r),
                 (None, None) => None
-            }
+            };
         }
         None
     }
 
-    fn bounding_box(&self, t0: f32, t1: f32) -> Option<AABB> {
+    fn bounding_box(&self, _t0: f32, _t1: f32) -> Option<AABB> {
         Some(self.bounding_box.clone())
+    }
+
+    fn box_clone(&self) -> Box<Hitable> {
+        Box::new((*self).clone())
     }
 }
