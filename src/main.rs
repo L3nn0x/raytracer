@@ -18,10 +18,44 @@ use camera::Camera;
 use lambertian::Lambertian;
 use metal::Metal;
 use dielectric::Dielectric;
+use material::Material;
 
 use std::rc::Rc;
 
 extern crate rand;
+
+fn random_scene() -> HitableList {
+    let mut objs: Vec<Box<Hitable>> = vec![
+        Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Rc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)))))
+    ];
+    for a in -11..11 {
+        for b in -11..11 {
+            let center = Vec3::new(a as f64 + 0.9 * rand::random::<f64>(), 0.2, b as f64 + 0.9 * rand::random::<f64>());
+            if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+                let rd = rand::random::<f32>();
+                let mat: Rc<Material> = if rd < 0.8 { // diffuse
+                    Rc::new(Lambertian::new(Vec3::new(
+                            rand::random::<f64>() * rand::random::<f64>(),
+                            rand::random::<f64>() * rand::random::<f64>(),
+                            rand::random::<f64>() * rand::random::<f64>())))
+                } else if rd < 0.95 { // metal
+                    Rc::new(Metal::new(Vec3::new(
+                            0.5 * (1.0 + rand::random::<f64>()),
+                            0.5 * (1.0 + rand::random::<f64>()),
+                            0.5 * (1.0 + rand::random::<f64>())),
+                            0.5 * rand::random::<f32>()))
+                } else { // glass
+                    Rc::new(Dielectric::new(1.5))
+                };
+                objs.push(Box::new(Sphere::new(center, 0.2, mat)));
+            }
+        }
+    }
+    objs.push(Box::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, Rc::new(Dielectric::new(1.5)))));
+    objs.push(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Rc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))))));
+    objs.push(Box::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, Rc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0)))));
+    HitableList::new(objs)
+}
 
 fn color(ray: Ray, world: &Hitable, depth: i32) -> Vec3 {
     if let Some(rec) = world.hit(&ray, 0.001, 10000.0) {
@@ -39,22 +73,23 @@ fn color(ray: Ray, world: &Hitable, depth: i32) -> Vec3 {
 }
 
 fn main() {
-    let nx = 200;
-    let ny = 100;
-    let ns = 100;
+    let nx = 1200;
+    let ny = 800;
+    let ns = 10;
     println!("P3\n{} {}\n255", nx, ny);
-    let objs: Vec<Box<Hitable>> = vec![
+    /*let objs: Vec<Box<Hitable>> = vec![
         Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Rc::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5))))),
         Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))))),
         Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.2)))),
         Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Rc::new(Dielectric::new(1.5)))),
         Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, Rc::new(Dielectric::new(1.5)))),
     ];
-    let world = HitableList::new(objs);
-    let look_from = Vec3::new(3.0, 3.0, 2.0);
-    let look_at = Vec3::new(0.0, 0.0, -1.0);
-    let dist_to_focus = (look_from - look_at).length();
-    let aperture = 2.0;
+    let world = HitableList::new(objs);*/
+    let world = random_scene();
+    let look_from = Vec3::new(13.0, 2.0, 3.0);
+    let look_at = Vec3::new(0.0, 0.0, 0.0);
+    let dist_to_focus = 10.0;
+    let aperture = 0.1;
     let cam = Camera::new(look_from, look_at, Vec3::new(0.0, 1.0, 0.0), 20.0, nx as f64 / ny as f64, aperture, dist_to_focus);
     for j in (0..ny - 1).rev() {
         for i in 0..nx {
