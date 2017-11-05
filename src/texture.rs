@@ -1,4 +1,5 @@
 use vec3::Vec3;
+use perlin::Perlin;
 
 pub trait Texture : Sync + Send {
     fn value(&self, u: f32, v: f32, p: Vec3) -> Vec3;
@@ -13,6 +14,25 @@ pub struct CheckerTexture {
     even: Box<Texture>
 }
 
+pub struct NoiseTexture {
+    noise: Perlin,
+    scale: f64
+}
+
+impl NoiseTexture {
+    pub fn new(scale: f64) -> NoiseTexture {
+        NoiseTexture{noise: Perlin::new(), scale: scale}
+    }
+}
+
+impl Texture for NoiseTexture {
+    fn value(&self, _u: f32, _v: f32, p: Vec3) -> Vec3 {
+        //Vec3::new(1.0, 1.0, 1.0) * 0.5 * (1.0 + self.noise.noise(self.scale * p))
+        //Vec3::new(1.0, 1.0, 1.0) * self.noise.turb(self.scale * p, 7)
+        Vec3::new(1.0, 1.0, 1.0) * 0.5 * (1.0 + (self.scale * p.x + 10.0 * self.noise.turb(p, 7)).sin())
+    }
+}
+
 impl ConstantTexture {
     pub fn new(color: Vec3) -> ConstantTexture {
         ConstantTexture{
@@ -22,7 +42,7 @@ impl ConstantTexture {
 }
 
 impl Texture for ConstantTexture {
-    fn value(&self, u: f32, v: f32, p: Vec3) -> Vec3 {
+    fn value(&self, _u: f32, _v: f32, _p: Vec3) -> Vec3 {
         self.color.clone()
     }
 }
