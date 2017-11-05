@@ -2,7 +2,6 @@
 
 A simple raytracer in Rust to learn the language.
 
----
 ## Features implemented:
 - Antialiasing
 - Diffuse materials
@@ -12,7 +11,6 @@ A simple raytracer in Rust to learn the language.
 - Defocus blur (or depth of field)
 - Motion blur
 
----
 ## Sample output
 
 Here is a sample output:
