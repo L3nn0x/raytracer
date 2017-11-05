@@ -43,6 +43,18 @@ impl Perlin {
             perm_z: perlin_generate_perm(),
         }
     }
+
+    pub fn turb(&self, p: Vec3, depth: i32) -> f64 {
+        let mut acc = 0.0;
+        let mut p = p;
+        let mut weight = 1.0;
+        for i in 0..depth {
+            acc += weight * self.noise(p);
+            weight *= 0.5;
+            p *= 2.0;
+        }
+        acc.abs()
+    }
 }
 
 fn perlin_generate() -> [Vec3; 256] {
