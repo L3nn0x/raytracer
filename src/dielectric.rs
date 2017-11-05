@@ -30,12 +30,12 @@ impl Material for Dielectric {
         if let Some(refracted) = refract(&ray_in.direction, &outward_normal, ni_over_nt) {
             let reflect_prob = schlick(cosine, self.ref_idx);
             if rand::random::<f64>() < reflect_prob {
-                Some(MaterialResult::new(attenuation, Ray::new(rec.p, reflected)))
+                Some(MaterialResult::new(attenuation, Ray::new(rec.p, reflected, ray_in.time)))
             } else {
-                Some(MaterialResult::new(attenuation, Ray::new(rec.p, refracted)))
+                Some(MaterialResult::new(attenuation, Ray::new(rec.p, refracted, ray_in.time)))
             }
         } else {
-            Some(MaterialResult::new(attenuation, Ray::new(rec.p, reflected)))
+            Some(MaterialResult::new(attenuation, Ray::new(rec.p, reflected, ray_in.time)))
         }
     }
 }

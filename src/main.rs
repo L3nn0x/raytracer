@@ -9,16 +9,15 @@ mod lambertian;
 mod metal;
 mod dielectric;
 
-use vec3::Vec3;
+use vec3::{Vec3, unit_vector};
 use ray::Ray;
 use hitable_list::HitableList;
-use sphere::Sphere;
+use sphere::{Sphere, MovingSphere};
 use hitable::Hitable;
 use camera::Camera;
 use lambertian::Lambertian;
 use metal::Metal;
 use dielectric::Dielectric;
-use material::Material;
 
 use std::rc::Rc;
 
@@ -31,23 +30,25 @@ fn random_scene() -> HitableList {
     for a in -11..11 {
         for b in -11..11 {
             let center = Vec3::new(a as f64 + 0.9 * rand::random::<f64>(), 0.2, b as f64 + 0.9 * rand::random::<f64>());
+            let center_end = center + Vec3::new(0.0, 0.5 * rand::random::<f64>(), 0.0);
             if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
                 let rd = rand::random::<f32>();
-                let mat: Rc<Material> = if rd < 0.8 { // diffuse
+                let obj:Box<Hitable> = if rd < 0.8 { // diffuse
+                    Box::new(MovingSphere::new(center, center_end, 0.2, 0.0, 1.0,
                     Rc::new(Lambertian::new(Vec3::new(
                             rand::random::<f64>() * rand::random::<f64>(),
                             rand::random::<f64>() * rand::random::<f64>(),
-                            rand::random::<f64>() * rand::random::<f64>())))
+                            rand::random::<f64>() * rand::random::<f64>())))))
                 } else if rd < 0.95 { // metal
-                    Rc::new(Metal::new(Vec3::new(
+                    Box::new(Sphere::new(center, 0.2, Rc::new(Metal::new(Vec3::new(
                             0.5 * (1.0 + rand::random::<f64>()),
                             0.5 * (1.0 + rand::random::<f64>()),
                             0.5 * (1.0 + rand::random::<f64>())),
-                            0.5 * rand::random::<f32>()))
+                            0.5 * rand::random::<f32>()))))
                 } else { // glass
-                    Rc::new(Dielectric::new(1.5))
+                    Box::new(Sphere::new(center, 0.2, Rc::new(Dielectric::new(1.5))))
                 };
-                objs.push(Box::new(Sphere::new(center, 0.2, mat)));
+                objs.push(obj);
             }
         }
     }
@@ -67,7 +68,7 @@ fn color(ray: Ray, world: &Hitable, depth: i32) -> Vec3 {
             }
         }
     }
-    let u = ray.direction();
+    let u = unit_vector(&ray.direction);
     let t = 0.5 * (u.y + 1.0);
     (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
 }
@@ -90,7 +91,8 @@ fn main() {
     let look_at = Vec3::new(0.0, 0.0, 0.0);
     let dist_to_focus = 10.0;
     let aperture = 0.1;
-    let cam = Camera::new(look_from, look_at, Vec3::new(0.0, 1.0, 0.0), 20.0, nx as f64 / ny as f64, aperture, dist_to_focus);
+    let cam = Camera::new(look_from, look_at, Vec3::new(0.0, 1.0, 0.0), 20.0,
+                        nx as f64 / ny as f64, aperture, dist_to_focus, 0.0, 1.0);
     for j in (0..ny - 1).rev() {
         for i in 0..nx {
             let mut col: Vec3 = Default::default();
