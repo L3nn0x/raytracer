@@ -29,9 +29,6 @@ impl Perlin {
                 }
             }
         }
-        /*self.ranfloat[(self.perm_x[(i) & 255] ^
-                       self.perm_y[(j) & 255] ^
-                       self.perm_z[(k) & 255]) as usize]*/
         trilinear_interp(c, u, v, w)
     }
 
@@ -76,7 +73,7 @@ fn trilinear_interp(c: [[[f64; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {
             for k in 0..2 {
                 accum += (i as f64 * u + (1.0 - i as f64) * (1.0 - u)) *
                          (j as f64 * v + (1.0 - j as f64) * (1.0 - v)) *
-                         (k as f64 * w + (1.0 - w as f64) * (1.0 - w)) * c[i][j][k];
+                         (k as f64 * w + (1.0 - k as f64) * (1.0 - w)) * c[i][j][k];
             }
         }
     }
