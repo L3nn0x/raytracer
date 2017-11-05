@@ -16,8 +16,9 @@ impl Vec3 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
-    pub fn make_unit(&mut self) {
+    pub fn make_unit(&mut self) -> Self {
         *self /= self.length();
+        *self
     }
 
     pub fn new(x: f64, y: f64, z: f64) -> Vec3 {

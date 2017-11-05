@@ -1,4 +1,4 @@
-use vec3::Vec3;
+use vec3::{Vec3, cross};
 use ray::Ray;
 
 use std::f64::consts::PI;
@@ -11,15 +11,18 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(vfov: f64, aspect: f64) -> Camera {
+    pub fn new(look_from: Vec3, look_at: Vec3, vup: Vec3, vfov: f64, aspect: f64) -> Camera {
         let theta = vfov * PI / 180.0;
         let half_height = (theta / 2.0).tan();
         let half_width = aspect * half_height;
+        let w = (look_from - look_at).make_unit();
+        let u = cross(&vup, &w).make_unit();
+        let v = cross(&w, &u);
         Camera{
-            origin: Default::default(),
-            lower_left_corner: Vec3::new(-half_width, -half_height, -1.0),
-            horizontal: Vec3::new(2.0 * half_width, 0.0, 0.0),
-            vertical: Vec3::new(0.0, 2.0 * half_height, 0.0),
+            origin: look_from,
+            lower_left_corner: look_from - half_width * u - half_height * v - w,
+            horizontal: 2.0 * half_width * u,
+            vertical: 2.0 * half_height * v,
         }
     }
 
