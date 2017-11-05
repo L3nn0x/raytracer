@@ -20,6 +20,7 @@ use metal::Metal;
 use dielectric::Dielectric;
 
 use std::rc::Rc;
+use std::f64::consts::PI;
 
 extern crate rand;
 
@@ -41,17 +42,15 @@ fn color(ray: Ray, world: &Hitable, depth: i32) -> Vec3 {
 fn main() {
     let nx = 200;
     let ny = 100;
-    let ns = 100;
+    let ns = 10;
     println!("P3\n{} {}\n255", nx, ny);
+    let R = (PI / 4.0).cos();
     let objs: Vec<Box<Hitable>> = vec![
-        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Rc::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5))))),
-        Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))))),
-        Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0)))),
-        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Rc::new(Dielectric::new(1.5)))),
-        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, Rc::new(Dielectric::new(1.5)))),
+        Box::new(Sphere::new(Vec3::new(-R, 0.0, -1.0), R, Rc::new(Lambertian::new(Vec3::new(0.0, 0.0, 1.0))))),
+        Box::new(Sphere::new(Vec3::new(R, 0.0, -1.0), R, Rc::new(Lambertian::new(Vec3::new(1.0, 0.0, 0.0))))),
     ];
     let world = HitableList::new(objs);
-    let cam = Camera::new();
+    let cam = Camera::new(90.0, nx as f64 / ny as f64);
     for j in (0..ny - 1).rev() {
         for i in 0..nx {
             let mut col: Vec3 = Default::default();

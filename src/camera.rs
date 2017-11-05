@@ -1,6 +1,8 @@
 use vec3::Vec3;
 use ray::Ray;
 
+use std::f64::consts::PI;
+
 pub struct Camera {
     origin: Vec3,
     lower_left_corner: Vec3,
@@ -9,12 +11,15 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new() -> Camera {
+    pub fn new(vfov: f64, aspect: f64) -> Camera {
+        let theta = vfov * PI / 180.0;
+        let half_height = (theta / 2.0).tan();
+        let half_width = aspect * half_height;
         Camera{
             origin: Default::default(),
-            lower_left_corner: Vec3::new(-2.0, -1.0, -1.0),
-            horizontal: Vec3::new(4.0, 0.0, 0.0),
-            vertical: Vec3::new(0.0, 2.0, 0.0),
+            lower_left_corner: Vec3::new(-half_width, -half_height, -1.0),
+            horizontal: Vec3::new(2.0 * half_width, 0.0, 0.0),
+            vertical: Vec3::new(0.0, 2.0 * half_height, 0.0),
         }
     }
 
