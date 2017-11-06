@@ -5,6 +5,7 @@ use material::Material;
 use aabb::{AABB, surrounding_box};
 
 use std::sync::Arc;
+use std::f64::consts::PI;
 
 #[derive(Clone)]
 pub struct Sphere {
@@ -44,12 +45,14 @@ impl Hitable for Sphere {
             let tmp = (-b - (b * b - a * c).sqrt()) / a;
             if tmp < tmax && tmp > tmin {
                 let point = ray.point_at_parameter(tmp);
-                return Some(HitRecord::new(tmp, point, (point - self.center) / self.radius, self.mat.clone()));
+                let (u, v) = get_sphere_uv((point - self.center) / self.radius);
+                return Some(HitRecord::new(tmp, point, (point - self.center) / self.radius, self.mat.clone(), u, v));
             }
             let tmp = (-b + (b * b - a * c).sqrt()) / a;
             if tmp < tmax && tmp > tmin {
                 let point = ray.point_at_parameter(tmp);
-                return Some(HitRecord::new(tmp, point, (point - self.center) / self.radius, self.mat.clone()));
+                let (u, v) = get_sphere_uv((point - self.center) / self.radius);
+                return Some(HitRecord::new(tmp, point, (point - self.center) / self.radius, self.mat.clone(), u, v));
             }
         }
         None
@@ -94,12 +97,14 @@ impl Hitable for MovingSphere {
             let tmp = (-b - (b * b - a * c).sqrt()) / a;
             if tmp < tmax && tmp > tmin {
                 let point = ray.point_at_parameter(tmp);
-                return Some(HitRecord::new(tmp, point, (point - self.center(ray.time)) / self.radius, self.mat.clone()));
+                let (u, v) = get_sphere_uv((point - self.center(ray.time)) / self.radius);
+                return Some(HitRecord::new(tmp, point, (point - self.center(ray.time)) / self.radius, self.mat.clone(), u, v));
             }
             let tmp = (-b + (b * b - a * c).sqrt()) / a;
             if tmp < tmax && tmp > tmin {
                 let point = ray.point_at_parameter(tmp);
-                return Some(HitRecord::new(tmp, point, (point - self.center(ray.time)) / self.radius, self.mat.clone()));
+                let (u, v) = get_sphere_uv((point - self.center(ray.time)) / self.radius);
+                return Some(HitRecord::new(tmp, point, (point - self.center(ray.time)) / self.radius, self.mat.clone(), u, v));
             }
         }
         None
@@ -116,4 +121,10 @@ impl Hitable for MovingSphere {
     fn box_clone(&self) -> Box<Hitable> {
         Box::new((*self).clone())
     }
+}
+
+fn get_sphere_uv(p: Vec3) -> (f64, f64) {
+    let phi = p.z.atan2(p.x);
+    let theta = p.y.asin();
+    (1.0 - (phi + PI) / (2.0 * PI), (theta + PI / 2.0) / PI)
 }

@@ -9,16 +9,20 @@ pub struct HitRecord {
     pub t: f64,
     pub p: Vec3,
     pub normal: Vec3,
-    pub mat: Arc<Material>
+    pub mat: Arc<Material>,
+    pub u: f64,
+    pub v: f64
 }
 
 impl HitRecord {
-    pub fn new(t: f64, p: Vec3, normal: Vec3, mat: Arc<Material>) -> HitRecord {
+    pub fn new(t: f64, p: Vec3, normal: Vec3, mat: Arc<Material>, u: f64, v: f64) -> HitRecord {
         HitRecord{
             t: t,
             p: p,
             normal: normal,
-            mat: mat
+            mat: mat,
+            u: u,
+            v: v
         }
     }
 }

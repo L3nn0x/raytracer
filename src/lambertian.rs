@@ -21,7 +21,7 @@ impl Lambertian {
 impl Material for Lambertian {
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<MaterialResult> {
         let target = rec.p + rec.normal + random_in_unit_sphere();
-        Some(MaterialResult::new(self.albedo.value(0.0, 0.0, rec.p), Ray::new(rec.p, target - rec.p, ray_in.time)))
+        Some(MaterialResult::new(self.albedo.value(rec.u as f32, rec.v as f32, rec.p), Ray::new(rec.p, target - rec.p, ray_in.time)))
     }
 }
 

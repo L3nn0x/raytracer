@@ -21,7 +21,7 @@ use camera::Camera;
 use lambertian::Lambertian;
 use metal::Metal;
 use dielectric::Dielectric;
-use texture::{ConstantTexture, CheckerTexture, NoiseTexture};
+use texture::{ConstantTexture, CheckerTexture, NoiseTexture, ImageTexture};
 
 use std::sync::Arc;
 
@@ -105,11 +105,11 @@ fn main() {
     let tex = Arc::new(NoiseTexture::new(10.0));
     let objs: Vec<Box<Hitable>> = vec![
         Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Arc::new(Lambertian::new(tex.clone())))),
-        Box::new(Sphere::new(Vec3::new(0.0, 2.0, 0.0), 2.0, Arc::new(Lambertian::new(tex.clone()))))
+        Box::new(Sphere::new(Vec3::new(0.0, 2.0, 0.0), 2.0, Arc::new(Lambertian::new(Arc::new(ImageTexture::new("./earth.jpg"))))))
     ];
     let world = HitableList::new(objs);
     let look_from = Vec3::new(13.0, 2.0, 3.0);
-    let look_at = Vec3::new(0.0, 0.0, 0.0);
+    let look_at = Vec3::new(0.0, 1.0, 0.0);
     let dist_to_focus = 10.0;
     let aperture = 0.1;
     let cam = Camera::new(look_from, look_at, Vec3::new(0.0, 1.0, 0.0), 20.0,

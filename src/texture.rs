@@ -1,6 +1,10 @@
 use vec3::Vec3;
 use perlin::Perlin;
 
+extern crate image;
+
+use image::{open, RgbImage};
+
 pub trait Texture : Sync + Send {
     fn value(&self, u: f32, v: f32, p: Vec3) -> Vec3;
 }
@@ -17,6 +21,31 @@ pub struct CheckerTexture {
 pub struct NoiseTexture {
     noise: Perlin,
     scale: f64
+}
+
+pub struct ImageTexture {
+    image: RgbImage
+}
+
+impl ImageTexture {
+    pub fn new(path: &str) -> ImageTexture {
+        ImageTexture{
+            image: open(&path).unwrap().to_rgb()
+        }
+    }
+}
+
+impl Texture for ImageTexture {
+    fn value(&self, u: f32, v: f32, _p: Vec3) -> Vec3 {
+        let i = u * self.image.width() as f32;
+        let j = (1.0 - v) * self.image.height() as f32 - 0.001;
+        let i = if i < 0.0 { 0.0 } else { i };
+        let j = if j < 0.0 { 0.0 } else { j };
+        let i = if i > (self.image.width() - 1) as f32 { (self.image.width() - 1) as f32 } else { i };
+        let j = if j > (self.image.height() - 1) as f32 { (self.image.height() - 1) as f32 } else { j };
+        let pixel = self.image.get_pixel(i as u32, j as u32);
+        Vec3::new(pixel.data[0] as f64 / 255.0, pixel.data[1] as f64 / 255.0, pixel.data[2] as f64 / 255.0)
+    }
 }
 
 impl NoiseTexture {

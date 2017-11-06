@@ -10,8 +10,13 @@ A simple raytracer in Rust to learn the language.
 - Positionable camera
 - Defocus blur (or depth of field)
 - Motion blur
+- Texture (constant texture, checker texture, perlin noise texture, image texture)
+- Bounding volume hierarchy partitioning with bounding boxes
 
 ## Sample output
 
-Here is a sample output:
-![Sample output](https://raw.githubusercontent.com/L3nn0x/raytracer/master/img.jpg)
+Here is the first version of the raytracer:
+![Version 0](imgs/version0.jpg)
+
+Here is the second version of the raytracer:
+![Version 1](imgs/version1.png)
