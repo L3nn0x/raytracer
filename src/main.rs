@@ -33,7 +33,7 @@ use image::Rgb;
 
 use rayon::prelude::*;
 
-#[warn(dead_code)]
+#[allow(dead_code)]
 fn random_scene() -> Box<Hitable> {
     let diff = |tex| material_builder(MaterialType::Lambertian(tex));
     let met = |v, f| material_builder(MaterialType::Metal(v, f));
@@ -92,7 +92,7 @@ fn color(ray: Ray, world: &Hitable, depth: i32) -> Vec3 {
     (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
 }
 
-#[warn(dead_code)]
+#[allow(dead_code)]
 fn simple_scene() -> Box<Hitable> {
     let tex = texture_builder(TextureType::Noise(10.0));
     let mut objs = Vec::new();
