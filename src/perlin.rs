@@ -17,9 +17,9 @@ impl Perlin {
         let u = u * u * (3.0 - 2.0 * u);
         let v = v * v * (3.0 - 2.0 * v);
         let w = w * w * (3.0 - 2.0 * w);
-        let i = p.x.floor() as usize;
-        let j = p.y.floor() as usize;
-        let k = p.z.floor() as usize;
+        let i = p.x.floor().abs() as usize;
+        let j = p.y.floor().abs() as usize;
+        let k = p.z.floor().abs() as usize;
         let mut c = [[[Default::default(); 2]; 2]; 2];
         for di in 0..2 {
             for dj in 0..2 {
