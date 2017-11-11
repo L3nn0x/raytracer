@@ -5,25 +5,25 @@ mod sphere;
 mod hitable_list;
 mod camera;
 mod material;
-mod lambertian; mod metal;
+mod lambertian;
+mod metal;
 mod dielectric;
 mod aabb;
 mod bvh;
 mod texture;
 mod perlin;
+mod texture_builder;
+mod material_builder;
+mod hitable_builder;
 
 use vec3::{Vec3, unit_vector};
 use ray::Ray;
-use hitable_list::HitableList;
-use sphere::{Sphere, MovingSphere};
 use hitable::Hitable;
 use camera::Camera;
-use lambertian::Lambertian;
-use metal::Metal;
-use dielectric::Dielectric;
-use texture::{ConstantTexture, CheckerTexture, NoiseTexture, ImageTexture};
 
-use std::sync::Arc;
+use material_builder::{MaterialType, material_builder};
+use hitable_builder::{HitableType, hitable_builder};
+use texture_builder::{TextureType, texture_builder};
 
 extern crate image;
 extern crate rand;
@@ -33,7 +33,7 @@ use image::Rgb;
 
 use rayon::prelude::*;
 
-fn random_scene() -> HitableList {
+/*fn random_scene() -> HitableList {
     let mut objs: Vec<Box<Hitable>> = vec![
         Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Arc::new(Lambertian::new(
                         Arc::new(CheckerTexture::new(
@@ -70,7 +70,7 @@ fn random_scene() -> HitableList {
     objs.push(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Arc::new(Lambertian::new(Arc::new(ConstantTexture::new(Vec3::new(0.4, 0.2, 0.1))))))));
     objs.push(Box::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, Arc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0)))));
     HitableList::new(objs)
-}
+}*/
 
 fn color(ray: Ray, world: &Hitable, depth: i32) -> Vec3 {
     if let Some(rec) = world.hit(&ray, 0.001, 10000.0) {
@@ -91,23 +91,11 @@ fn main() {
     let nx = 1200;
     let ny = 800;
     let ns = 10;
-    /*let objs: Vec<Box<Hitable>> = vec![
-        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Arc::new(
-                    Lambertian::new(Box::new(ConstantTexture::new(Vec3::new(0.1, 0.2, 0.5))))))),
-					Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Arc::new(
-                    Lambertian::new(Box::new(ConstantTexture::new(Vec3::new(0.8, 0.8, 0.0))))))),
-        Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, Arc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.2)))),
-        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, Arc::new(Dielectric::new(1.5)))),
-        Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.45, Arc::new(Dielectric::new(1.5)))),
-    ];
-    let world = HitableList::new(objs);*/
-    //let world = random_scene();
-    let tex = Arc::new(NoiseTexture::new(10.0));
-    let objs: Vec<Box<Hitable>> = vec![
-        Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Arc::new(Lambertian::new(tex.clone())))),
-        Box::new(Sphere::new(Vec3::new(0.0, 2.0, 0.0), 2.0, Arc::new(Lambertian::new(Arc::new(ImageTexture::new("./earth.jpg"))))))
-    ];
-    let world = HitableList::new(objs);
+    let tex = texture_builder(TextureType::Noise(10.0));
+    let mut objs = Vec::new();
+    objs.push(hitable_builder(HitableType::Sphere(Vec3::new(0.0, -1000.0, 0.0), 1000.0, material_builder(MaterialType::Lambertian(tex)))));
+    objs.push(hitable_builder(HitableType::Sphere(Vec3::new(0.0, 2.0, 0.0), 2.0, material_builder(MaterialType::Lambertian(texture_builder(TextureType::Image("./earth.jpg")))))));
+    let world = hitable_builder(HitableType::Bvh(objs, 0.001, 10000.0));
     let look_from = Vec3::new(13.0, 2.0, 3.0);
     let look_at = Vec3::new(0.0, 1.0, 0.0);
     let dist_to_focus = 10.0;
@@ -124,7 +112,7 @@ fn main() {
             let u = (rand::random::<f64>() + i as f64) / nx as f64;
             let v = (rand::random::<f64>() + j as f64) / ny as f64;
             let ray = cam.get_ray(u, v);
-            col += color(ray, &world, 0);
+            col += color(ray, &*world, 0);
         }
         col /= ns as f64;
         let col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());

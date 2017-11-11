@@ -14,6 +14,7 @@ pub struct BVHNode {
 
 impl BVHNode {
     pub fn new(objs: Vec<Box<Hitable>>, t0: f32, t1: f32) -> BVHNode {
+        if objs.len() < 1 { panic!("The vector is empty"); }
         let mut objs = objs;
         let axis = (3.0 * rand::random::<f32>()) as i32;
         objs.sort_by(|a, b| {
@@ -38,7 +39,7 @@ impl BVHNode {
             right = Box::new(BVHNode::new(objs[objs.len() / 2..].to_vec(), t0, t1));
         }
         let box_left = left.bounding_box(t0, t1).unwrap();
-        let box_right = left.bounding_box(t0, t1).unwrap();
+        let box_right = right.bounding_box(t0, t1).unwrap();
         BVHNode{
             left: left,
             right: right,

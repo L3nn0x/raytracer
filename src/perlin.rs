@@ -2,8 +2,6 @@ use vec3::{Vec3, dot, unit_vector};
 
 extern crate rand;
 
-use rand::{random, thread_rng, Rng};
-
 pub struct Perlin {
     ranfloat: [Vec3; 256],
     perm_x: [u8; 256],
@@ -48,7 +46,7 @@ impl Perlin {
         let mut acc = 0.0;
         let mut p = p;
         let mut weight = 1.0;
-        for i in 0..depth {
+        for _i in 0..depth {
             acc += weight * self.noise(p);
             weight *= 0.5;
             p *= 2.0;
