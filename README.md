@@ -20,3 +20,6 @@ Here is the first version of the raytracer:
 
 Here is the second version of the raytracer:
 ![Version 1](imgs/version1.png)
+
+Here is the third version of the raytracer:
+![Version 2](imgs/version2.png)

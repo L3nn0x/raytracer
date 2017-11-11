@@ -23,7 +23,7 @@ use camera::Camera;
 
 use material_builder::{MaterialType, material_builder};
 use hitable_builder::{HitableType, hitable_builder};
-use texture_builder::{TextureType, texture_builder};
+use texture_builder::{TextureType, texture_builder, box_texture_builder};
 
 extern crate image;
 extern crate rand;
@@ -33,13 +33,18 @@ use image::Rgb;
 
 use rayon::prelude::*;
 
-/*fn random_scene() -> HitableList {
-    let mut objs: Vec<Box<Hitable>> = vec![
-        Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Arc::new(Lambertian::new(
-                        Arc::new(CheckerTexture::new(
-                                Box::new(ConstantTexture::new(Vec3::new(0.2, 0.3, 0.1))),
-                                Box::new(ConstantTexture::new(Vec3::new(0.9, 0.9, 0.9)))
-                                ))))))
+#[warn(dead_code)]
+fn random_scene() -> Box<Hitable> {
+    let diff = |tex| material_builder(MaterialType::Lambertian(tex));
+    let met = |v, f| material_builder(MaterialType::Metal(v, f));
+    let die = |f| material_builder(MaterialType::Dielectric(f));
+    let con = |v| texture_builder(TextureType::Constant(v));
+
+    let tex = texture_builder(TextureType::Checker(
+                            box_texture_builder(TextureType::Constant(Vec3::new(0.2, 0.3, 0.1))),
+                            box_texture_builder(TextureType::Constant(Vec3::new(0.9, 0.9, 0.9)))));
+    let mut objs = vec![
+        hitable_builder(HitableType::Sphere(Vec3::new(0.0, -1000.0, 0.0), 1000.0, diff(tex)))
     ];
     for a in -11..11 {
         for b in -11..11 {
@@ -47,30 +52,30 @@ use rayon::prelude::*;
             let center_end = center + Vec3::new(0.0, 0.5 * rand::random::<f64>(), 0.0);
             if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
                 let rd = rand::random::<f32>();
-                let obj:Box<Hitable> = if rd < 0.8 { // diffuse
-                    Box::new(MovingSphere::new(center, center_end, 0.2, 0.0, 1.0,
-                    Arc::new(Lambertian::new(Arc::new(ConstantTexture::new(Vec3::new(
+                let obj = if rd < 0.8 { // diffuse
+                    HitableType::MovingSphere(center, center_end, 0.2, 0.0, 1.0, diff(con(Vec3::new(
                             rand::random::<f64>() * rand::random::<f64>(),
                             rand::random::<f64>() * rand::random::<f64>(),
-                            rand::random::<f64>() * rand::random::<f64>())))))))
+                            rand::random::<f64>() * rand::random::<f64>()))))
                 } else if rd < 0.95 { // metal
-                    Box::new(Sphere::new(center, 0.2, Arc::new(Metal::new(Vec3::new(
+                    HitableType::Sphere(center, 0.2, met(Vec3::new(
                             0.5 * (1.0 + rand::random::<f64>()),
                             0.5 * (1.0 + rand::random::<f64>()),
                             0.5 * (1.0 + rand::random::<f64>())),
-                            0.5 * rand::random::<f32>()))))
+                            0.5 * rand::random::<f32>()))
                 } else { // glass
-                    Box::new(Sphere::new(center, 0.2, Arc::new(Dielectric::new(1.5))))
+                    HitableType::Sphere(center, 0.2, die(1.5))
                 };
-                objs.push(obj);
+                objs.push(hitable_builder(obj));
             }
         }
     }
-    objs.push(Box::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, Arc::new(Dielectric::new(1.5)))));
-    objs.push(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Arc::new(Lambertian::new(Arc::new(ConstantTexture::new(Vec3::new(0.4, 0.2, 0.1))))))));
-    objs.push(Box::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, Arc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0)))));
-    HitableList::new(objs)
-}*/
+    objs.push(hitable_builder(HitableType::Sphere(Vec3::new(0.0, 1.0, 0.0), 1.0, die(1.5))));
+    objs.push(hitable_builder(HitableType::Sphere(Vec3::new(-4.0, 1.0, 0.0), 1.0, diff(texture_builder(TextureType::Image("./earth.jpg"))))));
+    objs.push(hitable_builder(HitableType::Sphere(Vec3::new(4.0, 1.0, 0.0), 1.0, met(Vec3::new(0.7, 0.6, 0.5), 0.0))));
+    objs.push(hitable_builder(HitableType::Sphere(Vec3::new(0.0, 2.5, 0.0), 1.0, diff(texture_builder(TextureType::Noise(10.0))))));
+    hitable_builder(HitableType::Bvh(objs, 0.0, 1.0))
+}
 
 fn color(ray: Ray, world: &Hitable, depth: i32) -> Vec3 {
     if let Some(rec) = world.hit(&ray, 0.001, 10000.0) {
@@ -87,15 +92,20 @@ fn color(ray: Ray, world: &Hitable, depth: i32) -> Vec3 {
     (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
 }
 
-fn main() {
-    let nx = 1200;
-    let ny = 800;
-    let ns = 10;
+#[warn(dead_code)]
+fn simple_scene() -> Box<Hitable> {
     let tex = texture_builder(TextureType::Noise(10.0));
     let mut objs = Vec::new();
     objs.push(hitable_builder(HitableType::Sphere(Vec3::new(0.0, -1000.0, 0.0), 1000.0, material_builder(MaterialType::Lambertian(tex)))));
     objs.push(hitable_builder(HitableType::Sphere(Vec3::new(0.0, 2.0, 0.0), 2.0, material_builder(MaterialType::Lambertian(texture_builder(TextureType::Image("./earth.jpg")))))));
-    let world = hitable_builder(HitableType::Bvh(objs, 0.001, 10000.0));
+    hitable_builder(HitableType::Bvh(objs, 0.001, 10000.0))
+}
+
+fn main() {
+    let nx = 1200;
+    let ny = 800;
+    let ns = 10;
+    let world = random_scene();
     let look_from = Vec3::new(13.0, 2.0, 3.0);
     let look_at = Vec3::new(0.0, 1.0, 0.0);
     let dist_to_focus = 10.0;
