@@ -17,16 +17,16 @@ impl Perlin {
         let u = u * u * (3.0 - 2.0 * u);
         let v = v * v * (3.0 - 2.0 * v);
         let w = w * w * (3.0 - 2.0 * w);
-        let i = p.x.floor().abs() as usize;
-        let j = p.y.floor().abs() as usize;
-        let k = p.z.floor().abs() as usize;
+        let i = p.x.floor();
+        let j = p.y.floor();
+        let k = p.z.floor();
         let mut c = [[[Default::default(); 2]; 2]; 2];
         for di in 0..2 {
             for dj in 0..2 {
                 for dk in 0..2 {
-                    c[di][dj][dk] = self.ranfloat[(self.perm_x[(i + di) & 255] ^
-                                               self.perm_y[(j + dj) & 255] ^
-                                               self.perm_z[(k + dk) & 255]) as usize];
+                    c[di][dj][dk] = self.ranfloat[(self.perm_x[(i + di as f64) as usize & 255] ^
+                                                   self.perm_y[(j + dj as f64) as usize & 255] ^
+                                                   self.perm_z[(k + dk as f64) as usize & 255]) as usize];
                 }
             }
         }

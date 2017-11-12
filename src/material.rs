@@ -35,13 +35,16 @@ pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
     *v - 2.0 * dot(&v, &n) * *n
 }
 
-#[test]
-fn reflect_test() {
-    let a = Vec3::new(1.0, 1.0, 0.0);
-    let n = Vec3::new(0.0, 1.0, 0.0);
-    println!("first: {:?}", reflect(&a, &n));
-    assert!(reflect(&a, &n) == Vec3::new(1.0, -1.0, 0.0));
-    let a = Vec3::new(-1.0, -1.0, 0.0);
-    println!("second: {:?}", reflect(&a, &n));
-    assert!(reflect(&a, &n) == Vec3::new(-1.0, 1.0, 0.0));
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reflect_test() {
+        let a = Vec3::new(1.0, 1.0, 0.0);
+        let n = Vec3::new(0.0, 1.0, 0.0);
+        assert_eq!(reflect(&a, &n), Vec3::new(1.0, -1.0, 0.0));
+        let a = Vec3::new(-1.0, -1.0, 0.0);
+        assert_eq!(reflect(&a, &n), Vec3::new(-1.0, 1.0, 0.0));
+}
 }
